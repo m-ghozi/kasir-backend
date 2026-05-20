@@ -1,0 +1,172 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+// === ENUMERATIONS ===
+enum Role {
+  owner
+  staff
+}
+
+// === MODELS ===
+
+model User {
+  id          Int       @id @default(autoincrement())
+  username    String    @unique
+  pinHash     String // Hash dari PIN pengguna
+  name        String
+  role        Role      @default(staff)
+  permissions Json      @default("[]") // Array of PermissionKey disimpan sebagai JSON
+  isActive    Boolean   @default(true) // Di frontend angka 0/1, diubah menjadi Boolean
+  createdAt   DateTime  @default(now())
+  lastLoginAt DateTime?
+
+  // Relasi: Melacak data apa saja yang dibuat oleh User ini
+  transactions Transaction[]
+  stockIns     StockIn[]
+  stockOuts    StockOut[]
+}
+
+model Category {
+  id        Int       @id @default(autoincrement())
+  name      String
+  color     String
+  icon      String
+  isDeleted Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+
+  // Relasi
+  products Product[]
+}
+
+model Product {
+  id          Int       @id @default(autoincrement())
+  name        String
+  sku         String    @unique
+  categoryId  Int
+  price       Decimal   @db.Decimal(15, 2) // Menggunakan Decimal untuk presisi uang
+  hpp         Decimal   @db.Decimal(15, 2)
+  stock       Int       @default(0)
+  unit        String
+  description String?   @db.Text
+  photo       String?   @db.Text // Menyimpan URL gambar atau Base64 string
+  barcode     String?
+  isDeleted   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  // Foreign Key & Relasi
+  category  Category          @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  items     TransactionItem[]
+  stockIns  StockIn[]
+  stockOuts StockOut[]
+}
+
+model Supplier {
+  id        Int       @id @default(autoincrement())
+  name      String
+  phone     String?
+  address   String?   @db.Text
+  notes     String?   @db.Text
+  isDeleted Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+
+  // Relasi
+  stockIns StockIn[]
+}
+
+model StockIn {
+  id         Int      @id @default(autoincrement())
+  productId  Int
+  supplierId Int?
+  quantity   Int
+  buyPrice   Decimal  @db.Decimal(15, 2) // Harga beli saat penambahan stok
+  totalPrice Decimal  @db.Decimal(15, 2)
+  date       DateTime @default(now())
+  notes      String?  @db.Text
+
+  createdById Int?
+
+  // Foreign Key & Relasi
+  product   Product   @relation(fields: [productId], references: [id])
+  supplier  Supplier? @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+  createdBy User?     @relation(fields: [createdById], references: [id])
+}
+
+model StockOut {
+  id        Int      @id @default(autoincrement())
+  productId Int
+  quantity  Int
+  reason    String // Contoh: 'rusak', 'hilang', 'retur'
+  date      DateTime @default(now())
+  notes     String?  @db.Text
+
+  createdById Int?
+
+  // Foreign Key & Relasi
+  product   Product @relation(fields: [productId], references: [id])
+  createdBy User?   @relation(fields: [createdById], references: [id])
+}
+
+model Transaction {
+  id             Int      @id @default(autoincrement())
+  receiptNumber  String   @unique
+  subtotal       Decimal  @db.Decimal(15, 2)
+  discountType   String? // 'percentage' atau 'nominal'
+  discountValue  Decimal  @default(0) @db.Decimal(15, 2)
+  discountAmount Decimal  @default(0) @db.Decimal(15, 2)
+  total          Decimal  @db.Decimal(15, 2)
+  paymentMethod  String // tunai, transfer, qris, e-wallet
+  paymentAmount  Decimal  @default(0) @db.Decimal(15, 2)
+  change         Decimal  @default(0) @db.Decimal(15, 2) // Kembalian
+  profit         Decimal  @db.Decimal(15, 2)
+  status         String   @default("completed") // 'open', 'completed', 'cancelled'
+  date           DateTime @default(now())
+
+  createdById Int
+
+  // Foreign Key & Relasi
+  createdBy User              @relation(fields: [createdById], references: [id])
+  items     TransactionItem[] // Relasi 1-ke-banyak dengan daftar belanjaan
+}
+
+model TransactionItem {
+  id            Int     @id @default(autoincrement())
+  transactionId Int
+  productId     Int
+  quantity      Int
+  price         Decimal @db.Decimal(15, 2) // Harga jual historis (saat transaksi terjadi)
+  hpp           Decimal @db.Decimal(15, 2) // HPP historis
+  totalPrice    Decimal @db.Decimal(15, 2)
+  profit        Decimal @db.Decimal(15, 2)
+
+  // Foreign Key & Relasi
+  transaction Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  product     Product     @relation(fields: [productId], references: [id])
+}
+
+// Tabel Master Data Sistem
+model Unit {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  isDefault Boolean   @default(false)
+  isDeleted Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+}
+
+model StoreSetting {
+  id             Int     @id @default(1) // Memaksa hanya ada 1 baris (singleton)
+  storeName      String
+  address        String? @db.Text
+  phone          String?
+  receiptFooter  String? @db.Text
+  onboardingDone Boolean @default(false)
+}
