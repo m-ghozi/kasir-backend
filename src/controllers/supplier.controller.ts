@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
-import { categoryService } from '../services/category.service';
+import { supplierService } from '../services/supplier.service';
 
-export const categoryController = {
+export const supplierController = {
   getAll: async (req: Request, res: Response): Promise<void> => {
     try {
-      const categories = await categoryService.getAllCategories();
-      res.json({ success: true, data: categories });
+      const suppliers = await supplierService.getAllSuppliers();
+      res.json({ success: true, data: suppliers });
     } catch (error: any) {
       res.status(500).json({ success: false, message: error.message });
     }
@@ -14,14 +14,14 @@ export const categoryController = {
   getById: async (req: Request, res: Response): Promise<void> => {
     try {
       const id = parseInt(req.params.id as string);
-      const category = await categoryService.getCategoryById(id);
-
-      if (!category) {
-        res.status(404).json({ success: false, message: 'Kategori tidak ditemukan' });
+      const supplier = await supplierService.getSupplierById(id);
+      
+      if (!supplier) {
+        res.status(404).json({ success: false, message: 'Supplier tidak ditemukan' });
         return;
       }
-
-      res.json({ success: true, data: category });
+      
+      res.json({ success: true, data: supplier });
     } catch (error: any) {
       res.status(500).json({ success: false, message: error.message });
     }
@@ -29,16 +29,15 @@ export const categoryController = {
 
   create: async (req: Request, res: Response): Promise<void> => {
     try {
-      const { name, color, icon } = req.body;
-
-      // Validasi input
-      if (!name || !color || !icon) {
-        res.status(400).json({ success: false, message: 'Nama, warna, dan icon wajib diisi!' });
+      const { name } = req.body;
+      
+      if (!name || name.trim() === '') {
+        res.status(400).json({ success: false, message: 'Nama supplier wajib diisi!' });
         return;
       }
 
-      const newCategory = await categoryService.createCategory(req.body);
-      res.status(201).json({ success: true, message: 'Kategori berhasil ditambahkan', data: newCategory });
+      const newSupplier = await supplierService.createSupplier(req.body);
+      res.status(201).json({ success: true, message: 'Supplier berhasil ditambahkan', data: newSupplier });
     } catch (error: any) {
       res.status(500).json({ success: false, message: error.message });
     }
@@ -47,8 +46,8 @@ export const categoryController = {
   update: async (req: Request, res: Response): Promise<void> => {
     try {
       const id = parseInt(req.params.id as string);
-      const updatedCategory = await categoryService.updateCategory(id, req.body);
-      res.json({ success: true, message: 'Kategori berhasil diubah', data: updatedCategory });
+      const updatedSupplier = await supplierService.updateSupplier(id, req.body);
+      res.json({ success: true, message: 'Data supplier berhasil diubah', data: updatedSupplier });
     } catch (error: any) {
       res.status(500).json({ success: false, message: error.message });
     }
@@ -57,8 +56,8 @@ export const categoryController = {
   delete: async (req: Request, res: Response): Promise<void> => {
     try {
       const id = parseInt(req.params.id as string);
-      await categoryService.deleteCategory(id);
-      res.json({ success: true, message: 'Kategori berhasil dihapus' });
+      await supplierService.deleteSupplier(id);
+      res.json({ success: true, message: 'Supplier berhasil dihapus' });
     } catch (error: any) {
       res.status(500).json({ success: false, message: error.message });
     }
