@@ -54,5 +54,33 @@ export const transactionController = {
       console.error("Transaction Error:", error);
       res.status(500).json({ success: false, message: 'Gagal memproses transaksi: ' + error.message });
     }
+  },
+
+  payHold: async (req: Request, res: Response): Promise<void> => {
+    try {
+      const id = parseInt(req.params.id as string);
+      const { paymentMethod, paymentAmount, change } = req.body;
+
+      if (!paymentMethod || paymentAmount === undefined) {
+        res.status(400).json({ success: false, message: 'Data pembayaran tidak lengkap' });
+        return;
+      }
+
+      const completedTransaction = await transactionService.payOpenBill(id, {
+        paymentMethod,
+        paymentAmount,
+        change
+      });
+
+      res.json({
+        success: true,
+        message: 'Hold Bill berhasil dilunasi',
+        data: completedTransaction
+      });
+    } catch (error: any) {
+      console.error("Pay Hold Bill Error:", error);
+      const statusCode = error.message.includes('tidak ditemukan') || error.message.includes('sudah lunas') ? 400 : 500;
+      res.status(statusCode).json({ success: false, message: error.message });
+    }
   }
 };

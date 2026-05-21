@@ -25,10 +25,11 @@ export const transactionService = {
     });
   },
 
-  // 3. Buat Transaksi Baru (Proses Kasir Berjalan)
+  // 3. Buat Transaksi Baru (Proses Kasir Berjalan / Hold Bill)
   createTransaction: async (data: any, userId: number) => {
-    // Menggunakan prisma.$transaction untuk memastikan semua operasi sukses atau gagal bersamaan
     return await prisma.$transaction(async (tx) => {
+      // Set default status ke completed jika tidak dikirim dari frontend
+      const txStatus = data.status || 'completed';
 
       // A. Simpan Header Transaksi
       const transaction = await tx.transaction.create({
@@ -39,18 +40,17 @@ export const transactionService = {
           discountValue: data.discountValue,
           discountAmount: data.discountAmount,
           total: data.total,
-          paymentMethod: data.paymentMethod,
-          paymentAmount: data.paymentAmount,
-          change: data.change,
+          paymentMethod: data.paymentMethod || null, // Bisa null jika status open
+          paymentAmount: data.paymentAmount || 0,
+          change: data.change || 0,
           profit: data.profit,
-          createdById: userId, // Diambil dari token JWT kasir yang sedang login
+          status: txStatus, // Simpan status transaksi
+          createdById: userId,
         }
       });
 
       // B. Loop setiap barang yang dibeli
       for (const item of data.items) {
-
-        // Simpan Detail Barang (TransactionItem)
         await tx.transactionItem.create({
           data: {
             transactionId: transaction.id,
@@ -63,18 +63,51 @@ export const transactionService = {
           }
         });
 
-        // C. Kurangi Stok Produk di database
-        await tx.product.update({
-          where: { id: item.productId },
-          data: {
-            stock: {
-              decrement: item.quantity // Otomatis mengurangi stok yang ada
-            }
-          }
-        });
+        // C. Kurangi Stok Produk HANYA JIKA status completed
+        if (txStatus === 'completed') {
+          await tx.product.update({
+            where: { id: item.productId },
+            data: { stock: { decrement: item.quantity } }
+          });
+        }
       }
 
       return transaction;
+    });
+  },
+
+  // 4. Lunasi Hold Bill (Ubah open jadi completed)
+  payOpenBill: async (id: number, paymentData: any) => {
+    return await prisma.$transaction(async (tx) => {
+      // A. Ambil transaksi beserta itemnya
+      const transaction = await tx.transaction.findUnique({
+        where: { id },
+        include: { items: true }
+      });
+
+      if (!transaction) throw new Error('Transaksi tidak ditemukan');
+      if (transaction.status === 'completed') throw new Error('Transaksi ini sudah lunas');
+
+      // B. Update status dan data pembayaran
+      const updatedTransaction = await tx.transaction.update({
+        where: { id },
+        data: {
+          status: 'completed',
+          paymentMethod: paymentData.paymentMethod,
+          paymentAmount: paymentData.paymentAmount,
+          change: paymentData.change,
+        }
+      });
+
+      // C. Potong stok sekarang karena sudah dilunasi
+      for (const item of transaction.items) {
+        await tx.product.update({
+          where: { id: item.productId },
+          data: { stock: { decrement: item.quantity } }
+        });
+      }
+
+      return updatedTransaction;
     });
   }
 };
