@@ -4,6 +4,8 @@ import dotenv from 'dotenv';
 import productRoutes from './routes/product.routes';
 import authRoutes from './routes/auth.routes'
 import categoryRoutes from './routes/category.routes';
+import transactionRoutes from './routes/transaction.routes';
+import stockRoutes from './routes/stock.routes'
 
 dotenv.config();
 
@@ -22,6 +24,8 @@ app.get('/', (req: Request, res: Response) => {
 app.use('/api/auth', authRoutes)
 app.use('/api/categories', categoryRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/transactions', transactionRoutes);
+app.use('/api/stocks', stockRoutes)
 
 // === Start Server ===
 app.listen(port, () => {
