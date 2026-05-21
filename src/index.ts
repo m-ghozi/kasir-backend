@@ -9,6 +9,7 @@ import stockRoutes from './routes/stock.routes'
 import dashboardRoutes from './routes/dashboard.routes'
 import reportRoutes from './routes/report.routes'
 import supplierRoutes from './routes/supplier.routes';
+import userRoutes from './routes/user.routes'
 
 dotenv.config();
 
@@ -32,6 +33,7 @@ app.use('/api/stocks', stockRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/suppliers', supplierRoutes);
+app.use('/api/users', userRoutes);
 
 // === Start Server ===
 app.listen(port, () => {
