@@ -7,6 +7,8 @@ const router = Router();
 // Proteksi rute dengan middleware JWT
 router.use(verifyToken);
 
+router.get('/me', userController.getMe);
+
 router.get('/', userController.getAll);
 router.get('/:id', userController.getById);
 router.post('/', userController.create);

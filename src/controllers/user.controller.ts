@@ -103,5 +103,35 @@ export const userController = {
     } catch (error: any) {
       res.status(500).json({ success: false, message: error.message });
     }
-  }
+  },
+
+  // Tambahkan metode baru ini:
+  getMe: async (req: Request, res: Response): Promise<void> => {
+    try {
+      // req.user.userId didapatkan secara otomatis dari token JWT yang sudah di-verify
+      const userId = req.user?.userId;
+
+      if (!userId) {
+        res.status(401).json({ success: false, message: 'Sesi tidak valid.' });
+        return;
+      }
+
+      // Gunakan service getById yang sudah kita miliki
+      const user = await userService.getUserById(userId);
+
+      if (!user) {
+        res.status(404).json({ success: false, message: 'User tidak ditemukan.' });
+        return;
+      }
+
+      if (!user.isActive) {
+        res.status(403).json({ success: false, message: 'Akun Anda telah dinonaktifkan.' });
+        return;
+      }
+
+      res.json({ success: true, data: user });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  },
 };
