@@ -11,6 +11,7 @@ import reportRoutes from './routes/report.routes'
 import supplierRoutes from './routes/supplier.routes';
 import userRoutes from './routes/user.routes'
 import storeSettingRoutes from './routes/storeSetting.routes'
+import unitRoutes from './routes/unit.routes';
 
 dotenv.config();
 
@@ -36,6 +37,7 @@ app.use('/api/reports', reportRoutes);
 app.use('/api/suppliers', supplierRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/store-settings', storeSettingRoutes);
+app.use('/api/units', unitRoutes);
 
 // === Start Server ===
 app.listen(port, () => {
