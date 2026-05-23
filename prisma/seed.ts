@@ -6,7 +6,7 @@ const hashPin = (pin: string) => crypto.createHash('sha256').update(pin).digest(
 async function main() {
   console.log('🌱 Memulai proses seeding database...');
 
-  // Membuat user Owner default
+  // --- User Owner default ---
   const owner = await prisma.user.upsert({
     where: { username: 'admin' },
     update: {},
@@ -15,14 +15,31 @@ async function main() {
       name: 'Pemilik Toko',
       pinHash: hashPin('123456'),
       role: 'owner',
-      permissions: ["ALL"],
+      permissions: ['ALL'],
       isActive: true,
     },
   });
 
-  console.log('✅ Seeding selesai! User default:');
-  console.log(`👤 Username: ${owner.username}`);
-  console.log(`🔑 PIN     : 123456`);
+  // --- Payment Methods default ---
+  const paymentMethods = [
+    { name: 'Tunai',         category: 'tunai',    isDefault: true  },
+    { name: 'Transfer Bank', category: 'transfer', isDefault: false },
+    { name: 'QRIS',          category: 'qris',     isDefault: false },
+    { name: 'E-Wallet',      category: 'e-wallet', isDefault: false },
+  ];
+
+  for (const pm of paymentMethods) {
+    await prisma.paymentMethod.upsert({
+      where: { name: pm.name },
+      update: {},
+      create: pm,
+    });
+  }
+
+  console.log('✅ Seeding selesai!');
+  console.log(`👤 Username : ${owner.username}`);
+  console.log(`🔑 PIN      : 123456`);
+  console.log(`💳 Payment methods: ${paymentMethods.map(p => p.name).join(', ')}`);
 }
 
 main()

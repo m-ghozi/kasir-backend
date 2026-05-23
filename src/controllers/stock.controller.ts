@@ -1,11 +1,27 @@
 import { Request, Response } from 'express';
 import { stockService } from '../services/stock.service';
 
+// Helper: parse ?from query param
+// Accepts ISO date string (e.g. "2025-05-01") or shorthand days (e.g. "7", "30")
+function parseFromDate(from?: string): Date | undefined {
+  if (!from) return undefined;
+  const days = Number(from);
+  if (!isNaN(days) && days > 0) {
+    const { startOfDay } = require('date-fns');
+    const { subDays } = require('date-fns');
+    return startOfDay(subDays(new Date(), days));
+  }
+  const parsed = new Date(from);
+  return isNaN(parsed.getTime()) ? undefined : parsed;
+}
+
 export const stockController = {
   // === STOCK IN ===
+
   getStockIn: async (req: Request, res: Response): Promise<void> => {
     try {
-      const data = await stockService.getAllStockIn();
+      const from = parseFromDate(req.query.from as string | undefined);
+      const data = await stockService.getAllStockIn(from);
       res.json({ success: true, data });
     } catch (error: any) {
       res.status(500).json({ success: false, message: error.message });
@@ -30,9 +46,11 @@ export const stockController = {
   },
 
   // === STOCK OUT ===
+
   getStockOut: async (req: Request, res: Response): Promise<void> => {
     try {
-      const data = await stockService.getAllStockOut();
+      const from = parseFromDate(req.query.from as string | undefined);
+      const data = await stockService.getAllStockOut(from);
       res.json({ success: true, data });
     } catch (error: any) {
       res.status(500).json({ success: false, message: error.message });
@@ -54,5 +72,17 @@ export const stockController = {
     } catch (error: any) {
       res.status(400).json({ success: false, message: error.message });
     }
-  }
+  },
+
+  // === STOCK REPORT ===
+
+  getReport: async (req: Request, res: Response): Promise<void> => {
+    try {
+      const period = req.query.period as string | undefined;
+      const data = await stockService.getReport(period);
+      res.json({ success: true, data });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  },
 };

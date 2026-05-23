@@ -56,6 +56,8 @@ Buat file `.env` di root proyek:
 ```env
 PORT=5000
 
+DATABASE_URL="mysql://user:password@localhost:3306/db_name"
+
 JWT_SECRET="kasir_super_rahasia_2026"
 
 DB_HOST=localhost

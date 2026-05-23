@@ -12,6 +12,7 @@ import supplierRoutes from './routes/supplier.routes';
 import userRoutes from './routes/user.routes'
 import storeSettingRoutes from './routes/storeSetting.routes'
 import unitRoutes from './routes/unit.routes';
+import paymentMethodRoutes from './routes/paymentMethod.routes';
 
 dotenv.config();
 
@@ -38,6 +39,7 @@ app.use('/api/suppliers', supplierRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/store-settings', storeSettingRoutes);
 app.use('/api/units', unitRoutes);
+app.use('/api/payment-methods', paymentMethodRoutes);
 
 // === Start Server ===
 app.listen(port, () => {

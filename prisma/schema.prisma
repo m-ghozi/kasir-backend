@@ -115,26 +115,36 @@ model StockOut {
   createdBy User?   @relation(fields: [createdById], references: [id])
 }
 
+model PaymentMethod {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  category  String   // "tunai" | "transfer" | "qris" | "e-wallet"
+  isDefault Boolean  @default(false)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  transactions Transaction[]
+}
+
 model Transaction {
-  id             Int      @id @default(autoincrement())
-  receiptNumber  String   @unique
-  subtotal       Decimal  @db.Decimal(15, 2)
-  discountType   String? // 'percentage' atau 'nominal'
-  discountValue  Decimal  @default(0) @db.Decimal(15, 2)
-  discountAmount Decimal  @default(0) @db.Decimal(15, 2)
-  total          Decimal  @db.Decimal(15, 2)
-  paymentMethod  String // tunai, transfer, qris, e-wallet
-  paymentAmount  Decimal  @default(0) @db.Decimal(15, 2)
-  change         Decimal  @default(0) @db.Decimal(15, 2) // Kembalian
-  profit         Decimal  @db.Decimal(15, 2)
-  status         String   @default("completed") // 'open', 'completed', 'cancelled'
-  date           DateTime @default(now())
+  id              Int      @id @default(autoincrement())
+  receiptNumber   String   @unique
+  subtotal        Decimal  @db.Decimal(15, 2)
+  discountType    String?  // 'percentage' atau 'nominal'
+  discountValue   Decimal  @default(0) @db.Decimal(15, 2)
+  discountAmount  Decimal  @default(0) @db.Decimal(15, 2)
+  total           Decimal  @db.Decimal(15, 2)
+  paymentMethodId Int
+  paymentAmount   Decimal  @default(0) @db.Decimal(15, 2)
+  change          Decimal  @default(0) @db.Decimal(15, 2)
+  profit          Decimal  @db.Decimal(15, 2)
+  status          String   @default("completed")
+  date            DateTime @default(now())
+  createdById     Int
 
-  createdById Int
-
-  // Foreign Key & Relasi
-  createdBy User              @relation(fields: [createdById], references: [id])
-  items     TransactionItem[] // Relasi 1-ke-banyak dengan daftar belanjaan
+  createdBy     User            @relation(fields: [createdById], references: [id])
+  paymentMethod PaymentMethod   @relation(fields: [paymentMethodId], references: [id])
+  items         TransactionItem[]
 }
 
 model TransactionItem {
