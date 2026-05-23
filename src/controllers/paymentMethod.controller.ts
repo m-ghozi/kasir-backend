@@ -1,109 +1,122 @@
-import { prisma } from '../lib/prisma';
+import { Request, Response } from 'express';
+import { paymentMethodService } from '../services/paymentMethod.service';
 
-export type PaymentCategory = 'tunai' | 'transfer' | 'qris' | 'e-wallet';
-
-export interface CreatePaymentMethodDto {
-  name: string;
-  category: PaymentCategory;
-  isDefault?: boolean;
-}
-
-export interface UpdatePaymentMethodDto {
-  name?: string;
-  category?: PaymentCategory;
-  isDefault?: boolean;
-  isActive?: boolean;
-}
-
-export const paymentMethodService = {
-  // GET /api/payment-methods — hanya yang aktif
-  getAll: async (includeInactive = false) => {
-    return prisma.paymentMethod.findMany({
-      where: includeInactive ? undefined : { isActive: true },
-      orderBy: [{ isDefault: 'desc' }, { createdAt: 'asc' }],
-    });
-  },
-
-  // GET /api/payment-methods/:id
-  getById: async (id: number) => {
-    return prisma.paymentMethod.findUnique({ where: { id } });
-  },
-
-  // POST /api/payment-methods
-  create: async (data: CreatePaymentMethodDto) => {
-    // Jika isDefault = true, reset default lama terlebih dahulu
-    if (data.isDefault) {
-      await prisma.paymentMethod.updateMany({
-        where: { isDefault: true },
-        data: { isDefault: false },
-      });
+export const paymentMethodController = {
+  getAll: async (req: Request, res: Response): Promise<void> => {
+    try {
+      const includeInactive = req.query.includeInactive === 'true';
+      const data = await paymentMethodService.getAll(includeInactive);
+      res.json({ success: true, data });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
     }
-
-    return prisma.paymentMethod.create({
-      data: {
-        name: data.name,
-        category: data.category,
-        isDefault: data.isDefault ?? false,
-      },
-    });
   },
 
-  // PUT /api/payment-methods/:id
-  update: async (id: number, data: UpdatePaymentMethodDto) => {
-    // Jika mengubah menjadi default, reset yang lain dulu
-    if (data.isDefault === true) {
-      await prisma.paymentMethod.updateMany({
-        where: { isDefault: true, id: { not: id } },
-        data: { isDefault: false },
-      });
+  getById: async (req: Request, res: Response): Promise<void> => {
+    try {
+      const id = Number(req.params.id);
+      const data = await paymentMethodService.getById(id);
+      if (!data) {
+        res.status(404).json({ success: false, message: 'Payment method tidak ditemukan' });
+        return;
+      }
+      res.json({ success: true, data });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
     }
-
-    return prisma.paymentMethod.update({
-      where: { id },
-      data: {
-        ...(data.name !== undefined && { name: data.name }),
-        ...(data.category !== undefined && { category: data.category }),
-        ...(data.isDefault !== undefined && { isDefault: data.isDefault }),
-        ...(data.isActive !== undefined && { isActive: data.isActive }),
-      },
-    });
   },
 
-  // DELETE /api/payment-methods/:id — soft delete via isActive = false
-  deactivate: async (id: number) => {
-    // Pastikan metode default tidak bisa di-nonaktifkan
-    const pm = await prisma.paymentMethod.findUnique({ where: { id } });
-    if (!pm) throw new Error('Payment method tidak ditemukan');
-    if (pm.isDefault) throw new Error('Metode pembayaran default tidak dapat dinonaktifkan');
-
-    return prisma.paymentMethod.update({
-      where: { id },
-      data: { isActive: false },
-    });
-  },
-
-  // DELETE /api/payment-methods/:id/hard — hapus permanen (hanya jika belum dipakai)
-  hardDelete: async (id: number) => {
-    const txCount = await prisma.transaction.count({ where: { paymentMethodId: id } });
-    if (txCount > 0) {
-      throw new Error(
-        `Tidak dapat menghapus: metode ini digunakan oleh ${txCount} transaksi. Gunakan nonaktifkan.`
-      );
+  create: async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { name, category, isDefault } = req.body;
+      if (!name || !category) {
+        res.status(400).json({ success: false, message: 'Field name dan category wajib diisi' });
+        return;
+      }
+      const validCategories = ['tunai', 'transfer', 'qris', 'e-wallet'];
+      if (!validCategories.includes(category)) {
+        res.status(400).json({
+          success: false,
+          message: `Category tidak valid. Pilihan: ${validCategories.join(', ')}`,
+        });
+        return;
+      }
+      const data = await paymentMethodService.create({ name, category, isDefault });
+      res.status(201).json({ success: true, message: 'Metode pembayaran berhasil ditambahkan', data });
+    } catch (error: any) {
+      if (error.code === 'P2002') {
+        res.status(409).json({ success: false, message: 'Nama metode pembayaran sudah digunakan' });
+        return;
+      }
+      res.status(500).json({ success: false, message: error.message });
     }
-
-    return prisma.paymentMethod.delete({ where: { id } });
   },
 
-  // POST /api/payment-methods/:id/set-default
-  setDefault: async (id: number) => {
-    await prisma.paymentMethod.updateMany({
-      where: { isDefault: true },
-      data: { isDefault: false },
-    });
+  update: async (req: Request, res: Response): Promise<void> => {
+    try {
+      const id = Number(req.params.id);
+      const { name, category, isDefault, isActive } = req.body;
+      if (category) {
+        const validCategories = ['tunai', 'transfer', 'qris', 'e-wallet'];
+        if (!validCategories.includes(category)) {
+          res.status(400).json({
+            success: false,
+            message: `Category tidak valid. Pilihan: ${validCategories.join(', ')}`,
+          });
+          return;
+        }
+      }
+      const data = await paymentMethodService.update(id, { name, category, isDefault, isActive });
+      res.json({ success: true, message: 'Metode pembayaran berhasil diubah', data });
+    } catch (error: any) {
+      if (error.code === 'P2025') {
+        res.status(404).json({ success: false, message: 'Payment method tidak ditemukan' });
+        return;
+      }
+      if (error.code === 'P2002') {
+        res.status(409).json({ success: false, message: 'Nama metode pembayaran sudah digunakan' });
+        return;
+      }
+      res.status(500).json({ success: false, message: error.message });
+    }
+  },
 
-    return prisma.paymentMethod.update({
-      where: { id },
-      data: { isDefault: true },
-    });
+  delete: async (req: Request, res: Response): Promise<void> => {
+    try {
+      const id = Number(req.params.id);
+      await paymentMethodService.delete(id);
+      res.json({ success: true, message: 'Metode pembayaran berhasil dihapus' });
+    } catch (error: any) {
+      if (error.code === 'P2025') {
+        res.status(404).json({ success: false, message: 'Payment method tidak ditemukan' });
+        return;
+      }
+      res.status(400).json({ success: false, message: error.message });
+    }
+  },
+
+  deactivate: async (req: Request, res: Response): Promise<void> => {
+    try {
+      const id = Number(req.params.id);
+      const data = await paymentMethodService.deactivate(id);
+      res.json({ success: true, message: 'Metode pembayaran berhasil dinonaktifkan', data });
+    } catch (error: any) {
+      const status = error.message.includes('tidak ditemukan') ? 404 : 400;
+      res.status(status).json({ success: false, message: error.message });
+    }
+  },
+
+  setDefault: async (req: Request, res: Response): Promise<void> => {
+    try {
+      const id = Number(req.params.id);
+      const data = await paymentMethodService.setDefault(id);
+      res.json({ success: true, message: 'Default metode pembayaran berhasil diubah', data });
+    } catch (error: any) {
+      if (error.code === 'P2025') {
+        res.status(404).json({ success: false, message: 'Payment method tidak ditemukan' });
+        return;
+      }
+      res.status(500).json({ success: false, message: error.message });
+    }
   },
 };
