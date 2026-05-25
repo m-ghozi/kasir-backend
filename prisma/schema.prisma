@@ -66,6 +66,7 @@ model Product {
   items     TransactionItem[]
   stockIns  StockIn[]
   stockOuts StockOut[]
+  hppHistories HppHistory[]
 }
 
 model Supplier {
@@ -179,4 +180,24 @@ model StoreSetting {
   phone          String?
   receiptFooter  String? @db.Text
   onboardingDone Boolean @default(false)
+}
+
+model HppHistory {
+  id          Int      @id @default(autoincrement())
+  productId   Int
+  oldHpp      Float
+  newHpp      Float
+  oldStock    Int
+  incomingQty Int
+  buyPrice    Float
+  source      String   // 'stock_in' | 'manual'
+  date        DateTime @default(now())
+  createdBy   Int?     // userId (nullable, untuk multi-user)
+
+  // Relations
+  product     Product  @relation(fields: [productId], references: [id])
+
+  @@index([productId])
+  @@index([date])
+  @@map("hpp_histories")
 }

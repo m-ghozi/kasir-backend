@@ -1,5 +1,6 @@
 import { prisma } from '../lib/prisma';
 import { startOfDay, subDays } from 'date-fns';
+import { hppHistoryService } from './hppHistory.service';
 
 // ── Helper ────────────────────────────────────────────────────────────────────
 
@@ -26,8 +27,8 @@ export const stockService = {
   },
 
   createStockIn: async (data: any, userId: number) => {
-    return await prisma.$transaction(async (tx) => {
-      const stockIn = await tx.stockIn.create({
+    const stockIn = await prisma.$transaction(async (tx) => {
+      const record = await tx.stockIn.create({
         data: {
           productId: data.productId,
           supplierId: data.supplierId || null,
@@ -44,8 +45,17 @@ export const stockService = {
         data: { stock: { increment: data.quantity } },
       });
 
-      return stockIn;
+      return record;
     });
+
+    await hppHistoryService.recalculateHpp(
+      data.productId,
+      data.quantity,
+      data.buyPrice,
+      userId
+    );
+
+    return stockIn;
   },
 
   // === STOCK OUT ===
@@ -92,7 +102,6 @@ export const stockService = {
   getReport: async (period?: string) => {
     const from = parsePeriod(period);
 
-    // Jalankan semua query paralel
     const [
       stockInAgg,
       stockInValue,
@@ -104,62 +113,45 @@ export const stockService = {
       outOfStock,
       totalCurrentStock,
     ] = await Promise.all([
-      // Total unit masuk dalam periode
       prisma.stockIn.aggregate({
         where: { date: { gte: from } },
         _sum: { quantity: true },
       }),
-
-      // Total nilai pembelian dalam periode
       prisma.stockIn.aggregate({
         where: { date: { gte: from } },
         _sum: { totalPrice: true, quantity: true },
       }),
-
-      // Total unit keluar dalam periode
       prisma.stockOut.aggregate({
         where: { date: { gte: from } },
         _sum: { quantity: true },
       }),
-
-      // Breakdown stock out per alasan
       prisma.stockOut.groupBy({
         by: ['reason'],
         where: { date: { gte: from } },
         _sum: { quantity: true },
         orderBy: { _sum: { quantity: 'desc' } },
       }),
-
-      // Data chart: stock in per hari
       prisma.stockIn.groupBy({
         by: ['date'],
         where: { date: { gte: from } },
         _sum: { quantity: true },
         orderBy: { date: 'asc' },
       }),
-
-      // Data chart: stock out per hari
       prisma.stockOut.groupBy({
         by: ['date'],
         where: { date: { gte: from } },
         _sum: { quantity: true },
         orderBy: { date: 'asc' },
       }),
-
-      // Produk stok menipis (1–5)
       prisma.product.findMany({
         where: { isDeleted: false, stock: { gt: 0, lte: 5 } },
         select: { id: true, name: true, stock: true, unit: true },
         orderBy: { stock: 'asc' },
       }),
-
-      // Produk stok habis
       prisma.product.findMany({
         where: { isDeleted: false, stock: 0 },
         select: { id: true, name: true, stock: true, unit: true },
       }),
-
-      // Total stok semua produk saat ini
       prisma.product.aggregate({
         where: { isDeleted: false },
         _sum: { stock: true },

@@ -13,6 +13,7 @@ import userRoutes from './routes/user.routes'
 import storeSettingRoutes from './routes/storeSetting.routes'
 import unitRoutes from './routes/unit.routes';
 import paymentMethodRoutes from './routes/paymentMethod.routes';
+import hppHistoryRoutes from './routes/hppHistory.routes';
 
 dotenv.config();
 
@@ -40,6 +41,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/store-settings', storeSettingRoutes);
 app.use('/api/units', unitRoutes);
 app.use('/api/payment-methods', paymentMethodRoutes);
+app.use('/api/hpp-history', hppHistoryRoutes);
 
 // === Start Server ===
 app.listen(port, () => {

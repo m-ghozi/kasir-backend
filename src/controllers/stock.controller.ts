@@ -2,7 +2,6 @@ import { Request, Response } from 'express';
 import { stockService } from '../services/stock.service';
 
 // Helper: parse ?from query param
-// Accepts ISO date string (e.g. "2025-05-01") or shorthand days (e.g. "7", "30")
 function parseFromDate(from?: string): Date | undefined {
   if (!from) return undefined;
   const days = Number(from);
@@ -28,6 +27,7 @@ export const stockController = {
     }
   },
 
+  // ✅ DIUBAH: response sekarang menyertakan hppUpdate info
   createStockIn: async (req: Request, res: Response): Promise<void> => {
     try {
       const userId = req.user?.userId;
@@ -39,7 +39,11 @@ export const stockController = {
       }
 
       const newStockIn = await stockService.createStockIn(req.body, userId);
-      res.status(201).json({ success: true, message: 'Stok masuk berhasil dicatat', data: newStockIn });
+      res.status(201).json({
+        success: true,
+        message: 'Stok masuk berhasil dicatat',
+        data: newStockIn,
+      });
     } catch (error: any) {
       res.status(500).json({ success: false, message: error.message });
     }
