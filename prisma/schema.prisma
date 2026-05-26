@@ -149,16 +149,19 @@ model Transaction {
 }
 
 model TransactionItem {
-  id            Int     @id @default(autoincrement())
+  id            Int      @id @default(autoincrement())
   transactionId Int
   productId     Int
   quantity      Int
-  price         Decimal @db.Decimal(15, 2) // Harga jual historis (saat transaksi terjadi)
-  hpp           Decimal @db.Decimal(15, 2) // HPP historis
-  totalPrice    Decimal @db.Decimal(15, 2)
-  profit        Decimal @db.Decimal(15, 2)
+  price         Decimal  @db.Decimal(15, 2)
+  hpp           Decimal  @db.Decimal(15, 2)
+  totalPrice    Decimal  @db.Decimal(15, 2)
+  profit        Decimal  @db.Decimal(15, 2)
+  discountType  String?
+  discountValue Decimal  @default(0) @db.Decimal(15, 2)
+  discountAmount Decimal @default(0) @db.Decimal(15, 2)
+  notes         String?  @db.Text
 
-  // Foreign Key & Relasi
   transaction Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
   product     Product     @relation(fields: [productId], references: [id])
 }

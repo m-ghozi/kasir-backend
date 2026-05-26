@@ -40,9 +40,9 @@ export const transactionService = {
           discountValue: data.discountValue,
           discountAmount: data.discountAmount,
           total: data.total,
-          paymentMethodId: Number(data.paymentMethodId) || 0,
-          paymentAmount: data.paymentAmount || 0,
-          change: data.change || 0,
+          paymentMethodId: data.paymentMethodId || undefined,
+          paymentAmount: data.paymentAmount || undefined,
+          change: data.change || undefined,
           profit: data.profit,
           status: txStatus, // Simpan status transaksi
           createdById: userId,
@@ -60,6 +60,10 @@ export const transactionService = {
             hpp: item.hpp,
             totalPrice: item.totalPrice,
             profit: item.profit,
+            discountType: item.discountType ?? null,
+            discountValue: item.discountValue ?? 0,
+            discountAmount: item.discountAmount ?? 0,
+            notes: item.notes ?? null,
           }
         });
 
@@ -93,9 +97,7 @@ export const transactionService = {
         where: { id },
         data: {
           status: 'completed',
-          ...(paymentData.paymentMethodId
-            ? { paymentMethod: { connect: { id: Number(paymentData.paymentMethodId) } } }
-            : {}),
+          paymentMethodId: paymentData.paymentMethodId || undefined,
           paymentAmount: paymentData.paymentAmount,
           change: paymentData.change,
         }
