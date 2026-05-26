@@ -34,13 +34,13 @@ export const transactionService = {
       // A. Simpan Header Transaksi
       const transaction = await tx.transaction.create({
         data: {
-          receiptNumber: data.receiptNumber,
+          receiptNumber: data.receiptNumber || `TX${Date.now()}`,
           subtotal: data.subtotal,
           discountType: data.discountType,
           discountValue: data.discountValue,
           discountAmount: data.discountAmount,
           total: data.total,
-          paymentMethod: data.paymentMethod || null, // Bisa null jika status open
+          paymentMethodId: Number(data.paymentMethodId) || 0,
           paymentAmount: data.paymentAmount || 0,
           change: data.change || 0,
           profit: data.profit,
@@ -93,7 +93,9 @@ export const transactionService = {
         where: { id },
         data: {
           status: 'completed',
-          paymentMethod: paymentData.paymentMethod,
+          ...(paymentData.paymentMethodId
+            ? { paymentMethod: { connect: { id: Number(paymentData.paymentMethodId) } } }
+            : {}),
           paymentAmount: paymentData.paymentAmount,
           change: paymentData.change,
         }
@@ -109,5 +111,21 @@ export const transactionService = {
 
       return updatedTransaction;
     });
-  }
+  },
+
+  cancelTransaction: async (id: number) => {
+    return await prisma.$transaction(async (tx) => {
+      const transaction = await tx.transaction.findUnique({
+        where: { id },
+        include: { items: true },
+      });
+
+      if (!transaction) throw new Error('Transaksi tidak ditemukan');
+      if (transaction.status === 'completed') throw new Error('Transaksi sudah selesai, tidak bisa dibatalkan');
+
+      // Kembalikan stok jika open bill sudah potong stok
+      // (sesuai logika kamu: open bill TIDAK potong stok, jadi ini aman dikosongkan)
+      await tx.transaction.delete({ where: { id } });
+    });
+  },
 };

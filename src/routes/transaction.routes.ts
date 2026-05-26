@@ -11,5 +11,6 @@ router.get('/:id', transactionController.getById);
 router.post('/', transactionController.create);
 
 router.put('/:id/pay', transactionController.payHold);
+router.delete('/:id', transactionController.cancel);
 
 export default router;

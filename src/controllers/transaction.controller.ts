@@ -59,17 +59,15 @@ export const transactionController = {
   payHold: async (req: Request, res: Response): Promise<void> => {
     try {
       const id = parseInt(req.params.id as string);
-      const { paymentMethod, paymentAmount, change } = req.body;
+      const { paymentMethodId, paymentAmount, change } = req.body;
 
-      if (!paymentMethod || paymentAmount === undefined) {
+      if (!paymentMethodId || paymentAmount === undefined) {
         res.status(400).json({ success: false, message: 'Data pembayaran tidak lengkap' });
         return;
       }
 
       const completedTransaction = await transactionService.payOpenBill(id, {
-        paymentMethod,
-        paymentAmount,
-        change
+        paymentMethodId, paymentAmount, change
       });
 
       res.json({
@@ -82,5 +80,15 @@ export const transactionController = {
       const statusCode = error.message.includes('tidak ditemukan') || error.message.includes('sudah lunas') ? 400 : 500;
       res.status(statusCode).json({ success: false, message: error.message });
     }
-  }
+  },
+  cancel: async (req: Request, res: Response): Promise<void> => {
+    try {
+      const id = Number(req.params.id);
+      await transactionService.cancelTransaction(id);
+      res.json({ success: true, message: 'Bill berhasil dibatalkan' });
+    } catch (error: any) {
+      const statusCode = error.message.includes('tidak ditemukan') ? 404 : 400;
+      res.status(statusCode).json({ success: false, message: error.message });
+    }
+  },
 };

@@ -135,7 +135,7 @@ model Transaction {
   discountValue   Decimal  @default(0) @db.Decimal(15, 2)
   discountAmount  Decimal  @default(0) @db.Decimal(15, 2)
   total           Decimal  @db.Decimal(15, 2)
-  paymentMethodId Int
+  paymentMethodId Int?
   paymentAmount   Decimal  @default(0) @db.Decimal(15, 2)
   change          Decimal  @default(0) @db.Decimal(15, 2)
   profit          Decimal  @db.Decimal(15, 2)
@@ -144,7 +144,7 @@ model Transaction {
   createdById     Int
 
   createdBy     User            @relation(fields: [createdById], references: [id])
-  paymentMethod PaymentMethod   @relation(fields: [paymentMethodId], references: [id])
+  paymentMethod PaymentMethod?  @relation(fields: [paymentMethodId], references: [id])
   items         TransactionItem[]
 }
 
