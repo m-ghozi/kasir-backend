@@ -14,6 +14,8 @@ import storeSettingRoutes from './routes/storeSetting.routes'
 import unitRoutes from './routes/unit.routes';
 import paymentMethodRoutes from './routes/paymentMethod.routes';
 import hppHistoryRoutes from './routes/hppHistory.routes';
+import expenseRoutes from './routes/expense.routes';
+import expenseCategoryRoutes from './routes/expenseCategory.routes';
 
 dotenv.config();
 
@@ -42,6 +44,8 @@ app.use('/api/store-settings', storeSettingRoutes);
 app.use('/api/units', unitRoutes);
 app.use('/api/payment-methods', paymentMethodRoutes);
 app.use('/api/hpp-history', hppHistoryRoutes);
+app.use('/api/expenses', expenseRoutes);
+app.use('/api/expense-categories', expenseCategoryRoutes);
 
 // === Start Server ===
 app.listen(port, () => {

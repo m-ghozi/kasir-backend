@@ -29,6 +29,7 @@ model User {
   transactions Transaction[]
   stockIns     StockIn[]
   stockOuts    StockOut[]
+  expenses     Expense[]
 }
 
 model Category {
@@ -125,6 +126,7 @@ model PaymentMethod {
   createdAt DateTime @default(now())
 
   transactions Transaction[]
+  expenses     Expense[]
 }
 
 model Transaction {
@@ -203,4 +205,39 @@ model HppHistory {
   @@index([productId])
   @@index([date])
   @@map("hpp_histories")
+}
+
+model ExpenseCategory {
+  id        Int       @id @default(autoincrement())
+  name      String
+  color     String
+  icon      String
+  isDefault Boolean   @default(false)
+  isDeleted Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+
+  expenses Expense[]
+
+  @@map("expense_categories")
+}
+
+model Expense {
+  id              Int      @id @default(autoincrement())
+  title           String
+  categoryId      Int
+  amount          Decimal  @db.Decimal(15, 2)
+  paymentMethodId Int?
+  date            DateTime
+  notes           String?  @db.Text
+  isDeleted       Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  deletedAt       DateTime?
+  createdById     Int?
+
+  category      ExpenseCategory @relation(fields: [categoryId], references: [id])
+  paymentMethod PaymentMethod?  @relation(fields: [paymentMethodId], references: [id], onDelete: SetNull)
+  createdBy     User?           @relation(fields: [createdById], references: [id])
+
+  @@map("expenses")
 }
