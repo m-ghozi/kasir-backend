@@ -132,6 +132,8 @@ model PaymentMethod {
 model Transaction {
   id              Int      @id @default(autoincrement())
   receiptNumber   String   @unique
+  customerId      Int?
+  customerName    String?  // Snapshot nama pelanggan saat transaksi
   subtotal        Decimal  @db.Decimal(15, 2)
   discountType    String?  // 'percentage' atau 'nominal'
   discountValue   Decimal  @default(0) @db.Decimal(15, 2)
@@ -148,6 +150,7 @@ model Transaction {
   createdBy     User            @relation(fields: [createdById], references: [id])
   paymentMethod PaymentMethod?  @relation(fields: [paymentMethodId], references: [id])
   items         TransactionItem[]
+  customer      Customer?       @relation(fields: [customerId], references: [id], onDelete: SetNull)
 }
 
 model TransactionItem {
@@ -240,4 +243,18 @@ model Expense {
   createdBy     User?           @relation(fields: [createdById], references: [id])
 
   @@map("expenses")
+}
+
+model Customer {
+  id        Int       @id @default(autoincrement())
+  name      String
+  phone     String?
+  email     String?
+  address   String?   @db.Text
+  notes     String?   @db.Text
+  isDeleted Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+
+  transactions Transaction[]
 }
