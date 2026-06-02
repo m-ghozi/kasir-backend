@@ -188,6 +188,8 @@ model StoreSetting {
   phone          String?
   receiptFooter  String? @db.Text
   onboardingDone Boolean @default(false)
+  themeColor     String? // HSL hue string, e.g. "25" for orange
+  logo           String? @db.LongText // Base64 JPEG
 }
 
 model HppHistory {

@@ -16,28 +16,39 @@ export const storeSettingService = {
           address: 'Alamat Toko Belum Diatur',
           phone: '-',
           receiptFooter: 'Terima Kasih Atas Kunjungan Anda',
-        },
+          themeColor: null,
+          logo: null,
+        },  
       });
     }
     return settings;
   },
 
-  // Perbarui data pengaturan toko
   updateSettings: async (data: any) => {
+    const payload: Record<string, any> = {
+      storeName: data.name,
+      address: data.address,
+      phone: data.phone,
+      receiptFooter: data.footerReceipt,
+    };
+
+    // Hanya update jika field dikirim (tidak undefined)
+    if (data.themeColor !== undefined) payload.themeColor = data.themeColor;
+    if (data.logo !== undefined) payload.logo = data.logo;
+    if (data.onboardingDone !== undefined) payload.onboardingDone = data.onboardingDone;
+
     return await prisma.storeSetting.upsert({
       where: { id: 1 },
-      update: {
-        storeName: data.name,
-        address: data.address,
-        phone: data.phone,
-        receiptFooter: data.footerReceipt,
-      },
+      update: payload,
       create: {
         id: 1,
-        storeName: data.name,
-        address: data.address,
-        phone: data.phone,
-        receiptFooter: data.footerReceipt,
+        storeName: data.name ?? 'Toko Kasir',
+        address: data.address ?? null,
+        phone: data.phone ?? null,
+        receiptFooter: data.footerReceipt ?? null,
+        themeColor: data.themeColor ?? null,
+        logo: data.logo ?? null,
+        onboardingDone: data.onboardingDone ?? false,
       },
     });
   },
