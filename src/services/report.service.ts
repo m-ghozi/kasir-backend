@@ -89,5 +89,67 @@ export const reportService = {
       chartData,
       topProducts
     };
-  }
+  },
+
+  getDailyReport: async (dateStr: string) => {
+    const start = new Date(`${dateStr}T00:00:00`);
+    const end = new Date(`${dateStr}T23:59:59.999`);
+
+    const transactions = await prisma.transaction.findMany({
+      where: {
+        date: { gte: start, lte: end },
+        status: 'completed',
+      },
+      include: {
+        items: {
+          include: { product: { select: { name: true } } },
+        },
+        paymentMethod: { select: { name: true } },
+      },
+      orderBy: { date: 'asc' },
+    });
+
+    const totalRevenue = transactions.reduce((acc, tx) => acc + Number(tx.total), 0);
+    const totalProfit = transactions.reduce((acc, tx) => acc + Number(tx.profit), 0);
+    const totalSalesCount = transactions.length;
+    const avgTransaction = totalSalesCount > 0 ? totalRevenue / totalSalesCount : 0;
+
+    // Breakdown per metode pembayaran
+    const paymentMap = new Map<string, { name: string; amount: number; count: number }>();
+    transactions.forEach((tx) => {
+      const name = tx.paymentMethod?.name ?? 'Tanpa metode';
+      if (!paymentMap.has(name)) paymentMap.set(name, { name, amount: 0, count: 0 });
+      const cur = paymentMap.get(name)!;
+      cur.amount += Number(tx.total);
+      cur.count += 1;
+    });
+    const paymentBreakdown = Array.from(paymentMap.values())
+      .sort((a, b) => b.amount - a.amount);
+
+    // Top products (up to 10)
+    const productMap = new Map<number, { name: string; revenue: number; profit: number; quantity: number }>();
+    transactions.forEach((tx) => {
+      tx.items.forEach((item) => {
+        if (!productMap.has(item.productId)) {
+          productMap.set(item.productId, {
+            name: item.product?.name ?? 'Produk Dihapus',
+            revenue: 0, profit: 0, quantity: 0,
+          });
+        }
+        const cur = productMap.get(item.productId)!;
+        cur.revenue += Number(item.totalPrice);
+        cur.profit += Number(item.profit);
+        cur.quantity += item.quantity;
+      });
+    });
+    const topProducts = Array.from(productMap.values())
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, 10);
+
+    return {
+      stats: { totalRevenue, totalProfit, totalSalesCount, avgTransaction },
+      paymentBreakdown,
+      topProducts,
+    };
+  },
 };
