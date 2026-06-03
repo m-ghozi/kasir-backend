@@ -79,7 +79,7 @@ export const reportService = {
 
     // Urutkan berdasarkan pendapatan terbesar dan ambil 10 besar
     const topProducts = Array.from(productMap.values())
-      .sort((a, b) => b.revenue - a.revenue)
+      .sort((a, b) => b.quantity - a.quantity)
       .slice(0, 10);
 
     return {
@@ -150,7 +150,7 @@ export const reportService = {
       });
     });
     const topProducts = Array.from(productMap.values())
-      .sort((a, b) => b.revenue - a.revenue)
+      .sort((a, b) => b.quantity - a.quantity)
       .slice(0, 10);
 
     return {
