@@ -24,6 +24,8 @@ export const reportService = {
     });
 
     // 3. Hitung Ringkasan Total (Summary Stats)
+    const totalGrossRevenue = transactions.reduce((acc, tx) => acc + Number(tx.subtotal), 0);
+    const totalDiscount = transactions.reduce((acc, tx) => acc + Number(tx.discountAmount ?? 0), 0);
     const totalRevenue = transactions.reduce((acc, tx) => acc + Number(tx.total), 0);
     const totalProfit = transactions.reduce((acc, tx) => acc + Number(tx.profit), 0);
     const totalSalesCount = transactions.length;
@@ -82,6 +84,8 @@ export const reportService = {
 
     return {
       stats: {
+        totalGrossRevenue,
+        totalDiscount,
         totalRevenue,
         totalProfit,
         totalSalesCount
@@ -109,9 +113,12 @@ export const reportService = {
       orderBy: { date: 'asc' },
     });
 
+    const totalGrossRevenue = transactions.reduce((acc, tx) => acc + Number(tx.subtotal), 0);
+    const totalDiscount = transactions.reduce((acc, tx) => acc + Number(tx.discountAmount ?? 0), 0);
     const totalRevenue = transactions.reduce((acc, tx) => acc + Number(tx.total), 0);
     const totalProfit = transactions.reduce((acc, tx) => acc + Number(tx.profit), 0);
     const totalSalesCount = transactions.length;
+    // avgTransaction dihitung dari penjualan bersih (setelah diskon)
     const avgTransaction = totalSalesCount > 0 ? totalRevenue / totalSalesCount : 0;
 
     // Breakdown per metode pembayaran
@@ -147,7 +154,14 @@ export const reportService = {
       .slice(0, 10);
 
     return {
-      stats: { totalRevenue, totalProfit, totalSalesCount, avgTransaction },
+      stats: {
+        totalGrossRevenue, // subtotal sebelum diskon
+        totalDiscount,     // total potongan diskon
+        totalRevenue,      // penjualan bersih (setelah diskon) = tx.total
+        totalProfit,
+        totalSalesCount,
+        avgTransaction,
+      },
       paymentBreakdown,
       topProducts,
     };
