@@ -5,7 +5,7 @@ export const categoryService = {
   getAllCategories: async () => {
     return await prisma.category.findMany({
       where: { isDeleted: false },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'asc' }
     });
   },
 

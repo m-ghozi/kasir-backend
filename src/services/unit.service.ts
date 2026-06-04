@@ -5,7 +5,7 @@ export const unitService = {
   getAllUnits: async () => {
     return await prisma.unit.findMany({
       where: { isDeleted: false },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'asc' }
     });
   },
 
