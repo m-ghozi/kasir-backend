@@ -6,11 +6,10 @@ export const expenseController = {
     try {
       const range = (req.query.range as string) || 'all';
       const categoryId = req.query.categoryId ? Number(req.query.categoryId as string) : undefined;
-      const paymentMethodId = req.query.paymentMethodId
-        ? Number(req.query.paymentMethodId as string)
-        : undefined;
+      const paymentMethodId = req.query.paymentMethodId ? Number(req.query.paymentMethodId as string) : undefined;
+      const date = req.query.date as string | undefined; // ← tambah ini
 
-      const data = await expenseService.getAll({ range: range as any, categoryId, paymentMethodId });
+      const data = await expenseService.getAll({ range: range as any, categoryId, paymentMethodId, date });
       res.json({ success: true, data });
     } catch (error: any) {
       res.status(500).json({ success: false, message: error.message });
@@ -21,8 +20,9 @@ export const expenseController = {
     try {
       const range = (req.query.range as string) || 'all';
       const categoryId = req.query.categoryId ? Number(req.query.categoryId as string) : undefined;
+      const date = req.query.date as string | undefined; // ← tambah ini
 
-      const data = await expenseService.getSummary({ range: range as any, categoryId });
+      const data = await expenseService.getSummary({ range: range as any, categoryId, date });
       res.json({ success: true, data });
     } catch (error: any) {
       res.status(500).json({ success: false, message: error.message });

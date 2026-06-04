@@ -3,13 +3,13 @@ import { startOfDay, startOfMonth, subDays } from 'date-fns';
 
 type RangePreset = 'today' | '7' | '30' | 'month' | 'all';
 
-function resolveRangeStart(range: RangePreset): Date | null {
-  const now = new Date();
+function resolveRangeStart(range: RangePreset, date?: string): Date | null {
+  const base = date ? new Date(`${date}T00:00:00`) : new Date();
   switch (range) {
-    case 'today': return startOfDay(now);
-    case '7': return startOfDay(subDays(now, 6));
-    case '30': return startOfDay(subDays(now, 29));
-    case 'month': return startOfMonth(now);
+    case 'today': return startOfDay(base);
+    case '7': return startOfDay(subDays(base, 6));
+    case '30': return startOfDay(subDays(base, 29));
+    case 'month': return startOfMonth(base);
     case 'all': return null;
   }
 }
@@ -20,14 +20,23 @@ export const expenseService = {
     range?: RangePreset;
     categoryId?: number;
     paymentMethodId?: number;
+    date?: string; // ← tambah ini
   }) => {
-    const { range = 'all', categoryId, paymentMethodId } = params;
-    const rangeStart = resolveRangeStart(range);
+    const { range = 'all', categoryId, paymentMethodId, date } = params;
+    const rangeStart = resolveRangeStart(range, date);
+    const endOfTargetDay = date && range === 'today'
+      ? new Date(`${date}T23:59:59`)
+      : undefined;
 
     return await prisma.expense.findMany({
       where: {
         isDeleted: false,
-        ...(rangeStart && { date: { gte: rangeStart } }),
+        ...(rangeStart && {
+          date: {
+            gte: rangeStart,
+            ...(endOfTargetDay && { lte: endOfTargetDay }),
+          },
+        }),
         ...(categoryId && { categoryId }),
         ...(paymentMethodId && { paymentMethodId }),
       },
@@ -47,13 +56,23 @@ export const expenseService = {
   },
 
   // Ringkasan: total & jumlah per kategori untuk range tertentu
-  getSummary: async (params: { range?: RangePreset; categoryId?: number }) => {
-    const { range = 'all', categoryId } = params;
-    const rangeStart = resolveRangeStart(range);
+  getSummary: async (params: { range?: RangePreset; categoryId?: number; date?: string }) => {
+    const { range = 'all', categoryId, date } = params;
+    const rangeStart = resolveRangeStart(range, date);
+
+    // Untuk 'today' dengan date spesifik, perlu batasan akhir hari juga
+    const endOfTargetDay = date && range === 'today'
+      ? new Date(`${date}T23:59:59`)
+      : undefined;
 
     const where = {
       isDeleted: false,
-      ...(rangeStart && { date: { gte: rangeStart } }),
+      ...(rangeStart && {
+        date: {
+          gte: rangeStart,
+          ...(endOfTargetDay && { lte: endOfTargetDay }),
+        },
+      }),
       ...(categoryId && { categoryId }),
     };
 
