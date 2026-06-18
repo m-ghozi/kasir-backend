@@ -6,20 +6,27 @@ dotenv.config();
 
 const adapter = new PrismaMariaDb({
   host: process.env.DB_HOST,
-  port: process.env.DB_PORT as any,
+  port: Number(process.env.DB_PORT),
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  connectionLimit: 10,
+  connectionLimit: process.env.NODE_ENV === 'production' ? 10 : 5,
 });
 
-const globalForPrisma = global as unknown as { prisma: PrismaClient };
+declare global {
+  var prisma: PrismaClient | undefined;
+}
 
 export const prisma =
-  globalForPrisma.prisma ||
+  global.prisma ??
   new PrismaClient({
     adapter,
-    log: ['query', 'info', 'warn', 'error'],
+    log:
+      process.env.NODE_ENV === 'production'
+        ? ['error']
+        : ['query', 'info', 'warn', 'error'],
   });
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+if (process.env.NODE_ENV !== 'production') {
+  global.prisma = prisma;
+}
