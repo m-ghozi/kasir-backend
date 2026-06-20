@@ -27,7 +27,7 @@ const port = process.env.PORT;
 
 app.use(helmet());
 
-app.set('trust proxy', true);
+app.set('trust proxy', 1);
 
 // Rate Limiting
 app.use(
