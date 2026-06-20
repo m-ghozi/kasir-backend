@@ -1,5 +1,5 @@
 import { prisma } from '../lib/prisma';
-import { startOfDay, subDays } from 'date-fns';
+import { startOfDay, subDays, addDays } from 'date-fns';
 import { hppHistoryService } from './hppHistory.service';
 
 // ── Helper ────────────────────────────────────────────────────────────────────
@@ -35,6 +35,7 @@ export const stockService = {
           quantity: data.quantity,
           buyPrice: data.buyPrice,
           totalPrice: data.quantity * data.buyPrice,
+          expireDate: data.expireDate ? new Date(data.expireDate) : null,
           notes: data.notes,
           createdById: userId,
         },
@@ -56,6 +57,28 @@ export const stockService = {
     );
 
     return stockIn;
+  },
+
+  // Daftar batch yang mendekati/sudah lewat kadaluarsa — buat alert.
+  // Catatan: ini berdasarkan tanggal batch StockIn, bukan sisa stok per-batch
+  // (karena pengurangan stok saat ini tidak dialokasikan ke batch tertentu).
+  getExpiringStock: async (days: number = 7) => {
+    const now = new Date();
+    const limit = addDays(now, days);
+    return await prisma.stockIn.findMany({
+      where: {
+        expireDate: { not: null, lte: limit },
+      },
+      select: {
+        id: true,
+        productId: true,
+        quantity: true,
+        expireDate: true,
+        date: true,
+        product: { select: { name: true, unit: true } },
+      },
+      orderBy: { expireDate: 'asc' },
+    });
   },
 
   // === STOCK OUT ===
@@ -112,6 +135,7 @@ export const stockService = {
       lowStock,
       outOfStock,
       totalCurrentStock,
+      expiringStock,
     ] = await Promise.all([
       prisma.stockIn.aggregate({
         where: { date: { gte: from } },
@@ -156,7 +180,30 @@ export const stockService = {
         where: { isDeleted: false },
         _sum: { stock: true },
       }),
+      prisma.stockIn.findMany({
+        where: { expireDate: { not: null, lte: addDays(new Date(), 7) } },
+        select: {
+          id: true,
+          productId: true,
+          quantity: true,
+          expireDate: true,
+          product: { select: { name: true, unit: true } },
+        },
+        orderBy: { expireDate: 'asc' },
+      }),
     ]);
+
+    const now = new Date();
+    const expiringRaw = expiringStock.map(s => ({
+      id: s.id,
+      productId: s.productId,
+      productName: s.product?.name ?? '-',
+      unit: s.product?.unit ?? '',
+      quantity: s.quantity,
+      expireDate: s.expireDate,
+    }));
+    const expired = expiringRaw.filter(s => s.expireDate && new Date(s.expireDate) < now);
+    const expiringSoon = expiringRaw.filter(s => s.expireDate && new Date(s.expireDate) >= now);
 
     return {
       summary: {
@@ -186,6 +233,8 @@ export const stockService = {
       alerts: {
         lowStock,
         outOfStock,
+        expired,
+        expiringSoon,
       },
     };
   },

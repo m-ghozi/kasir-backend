@@ -91,6 +91,7 @@ model StockIn {
   quantity   Int
   buyPrice   Decimal  @db.Decimal(15, 2) // Harga beli saat penambahan stok
   totalPrice Decimal  @db.Decimal(15, 2)
+  expireDate DateTime?
   date       DateTime @default(now())
   notes      String?  @db.Text
 
