@@ -71,6 +71,7 @@ CREATE TABLE `StockIn` (
     `quantity` INTEGER NOT NULL,
     `buyPrice` DECIMAL(15, 2) NOT NULL,
     `totalPrice` DECIMAL(15, 2) NOT NULL,
+    `expireDate` DATETIME(3) NULL,
     `date` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `notes` TEXT NULL,
     `createdById` INTEGER NULL,
