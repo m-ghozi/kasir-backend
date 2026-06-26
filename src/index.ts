@@ -27,7 +27,7 @@ const port = process.env.PORT;
 
 app.use(helmet());
 
-app.set('trust proxy', 1);
+app.set('trust proxy', 0);
 
 // Rate Limiting
 app.use(
@@ -42,6 +42,7 @@ app.use(
 app.use(
   cors({
     origin: [
+      'http://localhost:8080',
       'https://qasir.sayangibu.co.id',
       'https://www.qasir.sayangibu.co.id',
     ],
@@ -73,6 +74,11 @@ app.use('/api/expense-categories', expenseCategoryRoutes);
 app.use('/api/customers', customerRoutes);
 
 // === Start Server ===
-app.listen(port, () => {
-  console.log(`🚀 Server running on http://localhost:${port}`);
-});
+// Hanya start server saat dijalankan langsung (bukan saat di-import oleh test/supertest)
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(port, () => {
+    console.log(`🚀 Server running on http://localhost:${port}`);
+  });
+}
+
+export { app };
