@@ -13,6 +13,7 @@ Backend REST API untuk aplikasi kasir (Point of Sale) berbasis **Node.js**, **Ex
 - **Bahasa:** TypeScript 6
 - **Auth:** JSON Web Token (JWT)
 - **Dev Tools:** tsx (hot reload), dotenv
+- **Testing:** Vitest + supertest (lihat [README-TEST.md](./README-TEST.md))
 
 ---
 
@@ -32,6 +33,8 @@ kasir-backend/
 │   ├── lib/
 │   │   └── prisma.ts       # Instance Prisma client
 │   └── index.ts            # Entry point server
+├── test/                   # Unit & integration test (lihat README-TEST.md)
+├── vitest.config.ts
 ├── prisma.config.ts
 ├── tsconfig.json
 └── package.json
@@ -170,33 +173,36 @@ Authorization: Bearer <token>
 | GET    | `/api/transactions/:id`     | Detail transaksi                 |
 | POST   | `/api/transactions`         | Buat transaksi baru / hold bill  |
 | PUT    | `/api/transactions/:id/pay` | Lunasi hold bill                 |
+| DELETE | `/api/transactions/:id`     | Batalkan hold bill (status open) |
 
 **Contoh body buat transaksi:**
+
+> Catatan: nilai finansial (`subtotal`, `total`, `discountAmount`, `change`, `profit`)
+> **dihitung ulang di server** dari data produk — nilai yang dikirim klien diabaikan demi
+> keamanan. Klien cukup mengirim item, diskon, metode & jumlah bayar.
+
 ```json
 {
   "receiptNumber": "TRX-20260521-001",
-  "subtotal": 50000,
+  "paymentMethodId": 1,
+  "paymentAmount": 60000,
   "discountType": null,
   "discountValue": 0,
-  "discountAmount": 0,
-  "total": 50000,
-  "paymentMethod": "tunai",
-  "paymentAmount": 60000,
-  "change": 10000,
-  "profit": 15000,
   "status": "completed",
   "items": [
     {
       "productId": 1,
       "quantity": 2,
-      "price": 25000,
-      "hpp": 17500,
-      "totalPrice": 50000,
-      "profit": 15000
+      "discountType": null,
+      "discountValue": 0,
+      "notes": null
     }
   ]
 }
 ```
+
+> `status: "open"` membuat **hold bill** — stok tidak dipotong dan pembayaran ditunda
+> sampai dilunasi via `PUT /api/transactions/:id/pay`.
 
 ---
 
@@ -208,6 +214,7 @@ Authorization: Bearer <token>
 | POST   | `/api/stocks/in`   | Catat stok masuk            |
 | GET    | `/api/stocks/out`  | Riwayat stok keluar         |
 | POST   | `/api/stocks/out`  | Catat stok keluar / susut   |
+| GET    | `/api/stocks/report?period=7` | Laporan stok (mis. 7 hari) |
 
 ---
 
@@ -273,9 +280,30 @@ Entitas utama dalam database:
 ## Catatan Keamanan
 
 - PIN pengguna di-hash menggunakan **SHA-256** sebelum disimpan ke database.
-- Token JWT berlaku selama **12 jam**.
+- Token JWT berlaku selama **1 hari** (`expiresIn: '1d'`).
 - Manajemen pengguna hanya dapat dilakukan oleh akun dengan role `owner`.
 - Semua penghapusan data menggunakan **soft delete** (field `isDeleted`) agar riwayat transaksi tetap terjaga.
+
+---
+
+## Testing
+
+Project ini memiliki test **unit** (mock Prisma, tanpa DB) dan **integration** (DB nyata).
+
+```bash
+npm run test:unit   # unit test — cepat, tanpa database
+npm run test:int    # integration test — butuh database kasir_test
+npm test            # semua test
+```
+
+Sebelum integration test pertama kali, siapkan database test (terpisah dari data dev):
+
+```bash
+docker exec mysql-dev mysql -uroot -proot123 -e "CREATE DATABASE IF NOT EXISTS kasir_test"
+npm run test:db:push
+```
+
+Panduan lengkap (struktur, cakupan, troubleshooting) ada di **[README-TEST.md](./README-TEST.md)**.
 
 ---
 

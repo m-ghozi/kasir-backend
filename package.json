@@ -10,7 +10,12 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "tsx prisma/seed.ts",
-    "prisma:seed-expense": "tsx prisma/seed-expense-categories.ts"
+    "prisma:seed-expense": "tsx prisma/seed-expense-categories.ts",
+    "test:db:push": "DATABASE_URL=mysql://root:root123@localhost:3306/kasir_test prisma db push",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:unit": "vitest run test/unit",
+    "test:int": "vitest run test/integration"
   },
   "keywords": [],
   "author": "",
@@ -32,8 +37,11 @@
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.9.0",
+    "@types/supertest": "^7.2.0",
     "prisma": "^7.8.0",
+    "supertest": "^7.2.2",
     "tsx": "^4.22.2",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.9"
   }
 }
