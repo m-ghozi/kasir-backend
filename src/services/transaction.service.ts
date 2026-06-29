@@ -185,6 +185,8 @@ export const transactionService = {
           profit: parseFloat(totalProfit.toFixed(2)),
           status: txStatus,
           createdById: userId,
+          customerId: data.customerId ? Number(data.customerId) : null,
+          customerName: data.customerName?.trim() || null,
         },
       });
 
@@ -264,6 +266,8 @@ export const transactionService = {
           paymentMethodId: paymentData.paymentMethodId ?? null,
           paymentAmount: parseFloat(paymentAmount.toFixed(2)),
           change: parseFloat(change.toFixed(2)),
+          customerId: paymentData.customerId ? Number(paymentData.customerId) : undefined,
+          customerName: paymentData.customerName?.trim() || undefined,
         },
       });
 
