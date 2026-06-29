@@ -1,0 +1,12 @@
+$kind: http-request
+name: Update Expense Category
+method: PUT
+url: '{{baseUrl}}/api/expense-categories/{{id}}'
+order: 4000
+body:
+  type: json
+  content: |-
+    {
+      "name": "Operasional Toko",
+      "color": "#059669"
+    }

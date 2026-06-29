@@ -1,0 +1,5 @@
+$kind: http-request
+name: Get All Units
+method: GET
+url: '{{baseUrl}}/api/units'
+order: 1000

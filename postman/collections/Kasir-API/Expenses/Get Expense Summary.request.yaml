@@ -1,0 +1,15 @@
+$kind: http-request
+name: Get Expense Summary
+method: GET
+url: '{{baseUrl}}/api/expenses/summary'
+order: 2000
+queryParams:
+  - key: range
+    value: '30'
+    disabled: true
+  - key: categoryId
+    value: '1'
+    disabled: true
+  - key: date
+    value: '2026-06-29'
+    disabled: true

@@ -1,0 +1,13 @@
+$kind: http-request
+name: Create Payment Method
+method: POST
+url: '{{baseUrl}}/api/payment-methods'
+order: 3000
+body:
+  type: json
+  content: |-
+    {
+      "name": "Tunai",
+      "category": "tunai",
+      "isDefault": true
+    }

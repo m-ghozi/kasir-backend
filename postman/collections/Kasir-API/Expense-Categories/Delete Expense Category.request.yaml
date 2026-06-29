@@ -1,0 +1,5 @@
+$kind: http-request
+name: Delete Expense Category
+method: DELETE
+url: '{{baseUrl}}/api/expense-categories/{{id}}'
+order: 5000

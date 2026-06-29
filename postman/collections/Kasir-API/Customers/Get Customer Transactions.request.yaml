@@ -1,0 +1,5 @@
+$kind: http-request
+name: Get Customer Transactions
+method: GET
+url: '{{baseUrl}}/api/customers/{{id}}/transactions'
+order: 3000

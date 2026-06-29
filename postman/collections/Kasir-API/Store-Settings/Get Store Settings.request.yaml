@@ -1,0 +1,5 @@
+$kind: http-request
+name: Get Store Settings
+method: GET
+url: '{{baseUrl}}/api/store-settings'
+order: 1000

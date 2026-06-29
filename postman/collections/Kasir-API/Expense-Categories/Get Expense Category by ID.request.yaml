@@ -1,0 +1,5 @@
+$kind: http-request
+name: Get Expense Category by ID
+method: GET
+url: '{{baseUrl}}/api/expense-categories/{{id}}'
+order: 2000

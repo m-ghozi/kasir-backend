@@ -1,0 +1,5 @@
+$kind: http-request
+name: Get Payment Method by ID
+method: GET
+url: '{{baseUrl}}/api/payment-methods/{{id}}'
+order: 2000

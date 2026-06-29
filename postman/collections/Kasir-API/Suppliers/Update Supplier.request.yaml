@@ -1,0 +1,12 @@
+$kind: http-request
+name: Update Supplier
+method: PUT
+url: '{{baseUrl}}/api/suppliers/{{id}}'
+order: 4000
+body:
+  type: json
+  content: |-
+    {
+      "name": "PT Sumber Makmur Jaya",
+      "phone": "08987654321"
+    }

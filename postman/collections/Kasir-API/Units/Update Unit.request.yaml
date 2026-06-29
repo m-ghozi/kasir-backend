@@ -1,0 +1,12 @@
+$kind: http-request
+name: Update Unit
+method: PUT
+url: '{{baseUrl}}/api/units/{{id}}'
+order: 4000
+body:
+  type: json
+  content: |-
+    {
+      "name": "buah",
+      "isDefault": true
+    }

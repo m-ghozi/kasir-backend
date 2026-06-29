@@ -1,0 +1,12 @@
+$kind: http-request
+name: Pay Hold Bill
+method: PUT
+url: '{{baseUrl}}/api/transactions/{{id}}/pay'
+order: 4000
+body:
+  type: json
+  content: |-
+    {
+      "paymentMethodId": 1,
+      "paymentAmount": 50000
+    }

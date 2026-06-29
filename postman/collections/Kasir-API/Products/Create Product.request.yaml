@@ -1,0 +1,19 @@
+$kind: http-request
+name: Create Product
+method: POST
+url: '{{baseUrl}}/api/products'
+order: 3000
+body:
+  type: json
+  content: |-
+    {
+      "name": "Teh Botol",
+      "sku": "PRD-001",
+      "price": 5000,
+      "hpp": 3000,
+      "categoryId": 1,
+      "unit": "botol",
+      "stock": 100,
+      "description": "Teh botol sosro",
+      "barcode": ""
+    }

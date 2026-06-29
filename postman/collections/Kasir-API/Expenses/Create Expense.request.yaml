@@ -1,0 +1,16 @@
+$kind: http-request
+name: Create Expense
+method: POST
+url: '{{baseUrl}}/api/expenses'
+order: 4000
+body:
+  type: json
+  content: |-
+    {
+      "title": "Beli Plastik",
+      "categoryId": 1,
+      "amount": 50000,
+      "paymentMethodId": 1,
+      "date": "2026-06-29",
+      "notes": ""
+    }

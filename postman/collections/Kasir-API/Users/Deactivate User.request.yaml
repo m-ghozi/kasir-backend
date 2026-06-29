@@ -1,0 +1,5 @@
+$kind: http-request
+name: Deactivate User
+method: DELETE
+url: '{{baseUrl}}/api/users/{{id}}'
+order: 6000

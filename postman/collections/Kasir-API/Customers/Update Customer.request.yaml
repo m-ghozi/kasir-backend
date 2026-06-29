@@ -1,0 +1,12 @@
+$kind: http-request
+name: Update Customer
+method: PUT
+url: '{{baseUrl}}/api/customers/{{id}}'
+order: 5000
+body:
+  type: json
+  content: |-
+    {
+      "name": "Budi Santoso Jr",
+      "phone": "08111222333"
+    }

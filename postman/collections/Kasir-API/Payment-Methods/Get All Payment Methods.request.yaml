@@ -1,0 +1,9 @@
+$kind: http-request
+name: Get All Payment Methods
+method: GET
+url: '{{baseUrl}}/api/payment-methods'
+order: 1000
+queryParams:
+  - key: includeInactive
+    value: 'true'
+    disabled: true

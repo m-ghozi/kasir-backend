@@ -1,0 +1,13 @@
+$kind: http-request
+name: Update Product
+method: PUT
+url: '{{baseUrl}}/api/products/{{id}}'
+order: 4000
+body:
+  type: json
+  content: |-
+    {
+      "name": "Teh Botol Sosro",
+      "price": 5500,
+      "hpp": 3200
+    }

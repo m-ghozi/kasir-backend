@@ -1,0 +1,5 @@
+$kind: http-request
+name: Get All Suppliers
+method: GET
+url: '{{baseUrl}}/api/suppliers'
+order: 1000

@@ -1,0 +1,5 @@
+$kind: http-request
+name: Cancel Transaction
+method: DELETE
+url: '{{baseUrl}}/api/transactions/{{id}}'
+order: 5000

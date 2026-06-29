@@ -1,0 +1,13 @@
+$kind: http-request
+name: Create Expense Category
+method: POST
+url: '{{baseUrl}}/api/expense-categories'
+order: 3000
+body:
+  type: json
+  content: |-
+    {
+      "name": "Operasional",
+      "color": "#10B981",
+      "icon": "🏢"
+    }

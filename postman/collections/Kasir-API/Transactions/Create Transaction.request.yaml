@@ -1,0 +1,26 @@
+$kind: http-request
+name: Create Transaction
+method: POST
+url: '{{baseUrl}}/api/transactions'
+order: 3000
+body:
+  type: json
+  content: |-
+    {
+      "status": "completed",
+      "paymentMethodId": 1,
+      "paymentAmount": 50000,
+      "discountType": null,
+      "discountValue": 0,
+      "customerId": null,
+      "customerName": null,
+      "items": [
+        {
+          "productId": 1,
+          "quantity": 2,
+          "discountType": null,
+          "discountValue": 0,
+          "notes": null
+        }
+      ]
+    }

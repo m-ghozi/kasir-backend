@@ -1,0 +1,5 @@
+$kind: http-request
+name: Deactivate Payment Method
+method: PATCH
+url: '{{baseUrl}}/api/payment-methods/{{id}}/deactivate'
+order: 6000

@@ -1,0 +1,13 @@
+$kind: http-request
+name: Create Category
+method: POST
+url: '{{baseUrl}}/api/categories'
+order: 3000
+body:
+  type: json
+  content: |-
+    {
+      "name": "Minuman",
+      "color": "#3B82F6",
+      "icon": "🥤"
+    }

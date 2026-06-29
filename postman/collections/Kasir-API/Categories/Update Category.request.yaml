@@ -1,0 +1,13 @@
+$kind: http-request
+name: Update Category
+method: PUT
+url: '{{baseUrl}}/api/categories/{{id}}'
+order: 4000
+body:
+  type: json
+  content: |-
+    {
+      "name": "Minuman Segar",
+      "color": "#2563EB",
+      "icon": "🥤"
+    }

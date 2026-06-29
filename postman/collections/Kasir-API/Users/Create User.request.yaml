@@ -1,0 +1,15 @@
+$kind: http-request
+name: Create User
+method: POST
+url: '{{baseUrl}}/api/users'
+order: 4000
+body:
+  type: json
+  content: |-
+    {
+      "username": "kasir1",
+      "name": "Kasir Satu",
+      "pin": "1234",
+      "role": "staff",
+      "permissions": []
+    }

@@ -1,0 +1,9 @@
+$kind: http-request
+name: Get All Customers
+method: GET
+url: '{{baseUrl}}/api/customers'
+order: 1000
+queryParams:
+  - key: search
+    value: ''
+    disabled: true

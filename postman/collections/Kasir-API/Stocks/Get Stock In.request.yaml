@@ -1,0 +1,9 @@
+$kind: http-request
+name: Get Stock In
+method: GET
+url: '{{baseUrl}}/api/stocks/in'
+order: 1000
+queryParams:
+  - key: from
+    value: '7'
+    disabled: true

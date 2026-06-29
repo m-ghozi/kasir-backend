@@ -1,0 +1,16 @@
+$kind: http-request
+name: Create Stock In
+method: POST
+url: '{{baseUrl}}/api/stocks/in'
+order: 2000
+body:
+  type: json
+  content: |-
+    {
+      "productId": 1,
+      "quantity": 50,
+      "buyPrice": 3000,
+      "supplierId": 1,
+      "expireDate": null,
+      "notes": ""
+    }

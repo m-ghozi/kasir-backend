@@ -1,0 +1,5 @@
+$kind: http-request
+name: Get My Profile
+method: GET
+url: '{{baseUrl}}/api/users/me'
+order: 1000

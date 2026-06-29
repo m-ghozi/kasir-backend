@@ -1,0 +1,14 @@
+$kind: http-request
+name: Login
+method: POST
+url: "{{baseUrl}}/api/auth/login"
+order: 1000
+auth:
+  type: noauth
+body:
+  type: json
+  content: |-
+    {
+      "username": "admin",
+      "pin": "123456"
+    }

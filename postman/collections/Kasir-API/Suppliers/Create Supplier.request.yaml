@@ -1,0 +1,14 @@
+$kind: http-request
+name: Create Supplier
+method: POST
+url: '{{baseUrl}}/api/suppliers'
+order: 3000
+body:
+  type: json
+  content: |-
+    {
+      "name": "PT Sumber Makmur",
+      "phone": "08123456789",
+      "address": "Jl. Raya No. 1",
+      "notes": ""
+    }

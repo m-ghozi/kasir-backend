@@ -1,0 +1,9 @@
+$kind: http-request
+name: Get Stock Out
+method: GET
+url: '{{baseUrl}}/api/stocks/out'
+order: 3000
+queryParams:
+  - key: from
+    value: '7'
+    disabled: true

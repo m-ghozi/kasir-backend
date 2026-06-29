@@ -1,0 +1,12 @@
+$kind: http-request
+name: Update Expense
+method: PUT
+url: '{{baseUrl}}/api/expenses/{{id}}'
+order: 5000
+body:
+  type: json
+  content: |-
+    {
+      "title": "Beli Plastik Besar",
+      "amount": 75000
+    }

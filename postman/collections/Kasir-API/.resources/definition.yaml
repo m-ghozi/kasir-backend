@@ -1,0 +1,36 @@
+$kind: collection
+name: Kasir API
+description: |-
+  REST API for the Qasirku point-of-sale (kasir) backend.
+
+  ## Authentication
+  All endpoints (except `POST /api/auth/login`) require a Bearer JWT token.
+  Use the **Login** request to obtain a token — it is automatically saved to the `token` collection variable via the post-response script.
+
+  ## Base URL
+  Set the `baseUrl` environment variable (e.g. `http://localhost:3000`) before sending requests.
+
+  ## Modules
+  - **Auth** – Login
+  - **Users** – Manage cashier accounts (owner only)
+  - **Categories** – Product categories
+  - **Products** – Product catalogue
+  - **Units** – Units of measure
+  - **Suppliers** – Supplier management
+  - **Customers** – Customer management
+  - **Transactions** – Sales transactions & hold bills
+  - **Stocks** – Stock-in / stock-out movements
+  - **Payment Methods** – Payment method configuration
+  - **Expenses** – Operational expense tracking
+  - **Expense Categories** – Expense category management
+  - **HPP History** – Cost-of-goods (HPP) history
+  - **Reports** – Sales reports
+  - **Dashboard** – Dashboard summary
+  - **Store Settings** – Store profile & settings
+variables:
+  baseUrl: http://localhost:3000
+  token: ""
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"

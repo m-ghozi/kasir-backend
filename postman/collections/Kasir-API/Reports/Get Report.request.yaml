@@ -1,0 +1,12 @@
+$kind: http-request
+name: Get Report
+method: GET
+url: '{{baseUrl}}/api/reports'
+order: 1000
+queryParams:
+  - key: period
+    value: '7'
+    disabled: true
+  - key: date
+    value: '2026-06-29'
+    disabled: true

@@ -1,0 +1,9 @@
+$kind: http-request
+name: Get Stock Report
+method: GET
+url: '{{baseUrl}}/api/stocks/report'
+order: 5000
+queryParams:
+  - key: period
+    value: '7'
+    disabled: true

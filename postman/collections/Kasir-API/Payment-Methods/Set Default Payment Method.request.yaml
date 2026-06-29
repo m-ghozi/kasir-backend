@@ -1,0 +1,5 @@
+$kind: http-request
+name: Set Default Payment Method
+method: PATCH
+url: '{{baseUrl}}/api/payment-methods/{{id}}/set-default'
+order: 7000

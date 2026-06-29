@@ -1,0 +1,15 @@
+$kind: http-request
+name: Update Store Settings
+method: PUT
+url: '{{baseUrl}}/api/store-settings'
+order: 2000
+body:
+  type: json
+  content: |-
+    {
+      "storeName": "Toko Qasir",
+      "address": "Jl. Contoh No. 1",
+      "phone": "08123456789",
+      "receiptFooter": "Terima kasih telah berbelanja!",
+      "themeColor": "25"
+    }

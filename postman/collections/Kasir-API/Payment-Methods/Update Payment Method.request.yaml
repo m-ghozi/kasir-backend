@@ -1,0 +1,14 @@
+$kind: http-request
+name: Update Payment Method
+method: PUT
+url: '{{baseUrl}}/api/payment-methods/{{id}}'
+order: 4000
+body:
+  type: json
+  content: |-
+    {
+      "name": "Cash",
+      "category": "tunai",
+      "isDefault": false,
+      "isActive": true
+    }

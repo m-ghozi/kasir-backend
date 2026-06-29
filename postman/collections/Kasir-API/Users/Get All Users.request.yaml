@@ -1,0 +1,5 @@
+$kind: http-request
+name: Get All Users
+method: GET
+url: '{{baseUrl}}/api/users'
+order: 2000

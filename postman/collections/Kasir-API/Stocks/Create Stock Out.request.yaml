@@ -1,0 +1,14 @@
+$kind: http-request
+name: Create Stock Out
+method: POST
+url: '{{baseUrl}}/api/stocks/out'
+order: 4000
+body:
+  type: json
+  content: |-
+    {
+      "productId": 1,
+      "quantity": 5,
+      "reason": "rusak",
+      "notes": "Barang rusak saat pengiriman"
+    }

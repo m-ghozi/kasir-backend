@@ -1,0 +1,12 @@
+$kind: http-request
+name: Update HPP Manually
+method: POST
+url: '{{baseUrl}}/api/hpp-history/manual'
+order: 3000
+body:
+  type: json
+  content: |-
+    {
+      "productId": 1,
+      "newHpp": 3500
+    }

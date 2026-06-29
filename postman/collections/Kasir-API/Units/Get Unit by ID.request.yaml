@@ -1,0 +1,5 @@
+$kind: http-request
+name: Get Unit by ID
+method: GET
+url: '{{baseUrl}}/api/units/{{id}}'
+order: 2000

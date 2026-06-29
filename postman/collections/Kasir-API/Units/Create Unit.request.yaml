@@ -1,0 +1,12 @@
+$kind: http-request
+name: Create Unit
+method: POST
+url: '{{baseUrl}}/api/units'
+order: 3000
+body:
+  type: json
+  content: |-
+    {
+      "name": "pcs",
+      "isDefault": false
+    }

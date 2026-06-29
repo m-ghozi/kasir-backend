@@ -1,0 +1,21 @@
+$kind: http-request
+name: Get All HPP History
+method: GET
+url: '{{baseUrl}}/api/hpp-history'
+order: 1000
+queryParams:
+  - key: productId
+    value: '1'
+    disabled: true
+  - key: source
+    value: ''
+    disabled: true
+  - key: from
+    value: ''
+    disabled: true
+  - key: to
+    value: ''
+    disabled: true
+  - key: limit
+    value: '10'
+    disabled: true
