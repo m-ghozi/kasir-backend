@@ -27,6 +27,18 @@ export const transactionService = {
     });
   },
 
+  // 2b. Ambil transaksi by receiptNumber (idempotency saat retry)
+  getByReceiptNumber: async (receiptNumber: string) => {
+    return await prisma.transaction.findUnique({
+      where: { receiptNumber: receiptNumber.trim() },
+      include: {
+        createdBy: { select: { name: true } },
+        paymentMethod: { select: { name: true, category: true } },
+        items: { include: { product: true } },
+      },
+    });
+  },
+
   // 3. Buat Transaksi Baru (Proses Kasir Berjalan / Hold Bill)
   createTransaction: async (data: any, userId: number) => {
     return await prisma.$transaction(async (tx) => {

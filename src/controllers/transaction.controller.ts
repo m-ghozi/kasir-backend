@@ -50,6 +50,16 @@ export const transactionController = {
         data: newTransaction
       });
     } catch (error: any) {
+      // Idempotency: retry koneksi jelek mengirim receiptNumber yang sama.
+      // Transaksi sudah tersimpan di percobaan sebelumnya — kembalikan yang ada
+      // alih-alih membuat duplikat (P2002 = unique constraint receiptNumber).
+      if (error.code === 'P2002' && req.body.receiptNumber) {
+        const existing = await transactionService.getByReceiptNumber(req.body.receiptNumber);
+        if (existing) {
+          res.status(200).json({ success: true, message: 'Transaksi sudah tersimpan', data: existing });
+          return;
+        }
+      }
       // Error handling jika stok tiba-tiba kurang atau ID produk salah
       console.error("Transaction Error:", error);
       res.status(500).json({ success: false, message: 'Gagal memproses transaksi: ' + error.message });
