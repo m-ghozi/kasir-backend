@@ -34,7 +34,10 @@ export const verifyToken = (req: Request, res: Response, next: NextFunction): vo
     // 6. Izinkan request masuk ke Controller (tahap selanjutnya)
     next();
   } catch (error) {
-    res.status(403).json({ success: false, message: 'Sesi berakhir atau token tidak valid. Silakan login ulang.' });
+    // Token kedaluwarsa / tanda tangan tidak valid = kegagalan autentikasi → 401
+    // (401 = sesi tidak valid, konsisten dengan cek "token tidak ditemukan" di atas.
+    //  403 dipakai khusus untuk user terautentikasi yang tidak punya izin.)
+    res.status(401).json({ success: false, message: 'Sesi berakhir atau token tidak valid. Silakan login ulang.' });
     return;
   }
 };
